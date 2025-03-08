@@ -23,6 +23,14 @@
 - WebSocket, Stomp 기반 실시간 채팅 서비스
 - Redis 기반 다중서버 확장성 설계
 
+### 환경설정
+
+1. **Docker Compose로 MySQL & Redis 실행**
+```shell
+cd ./db
+docker-compose up -d
+```
+
 ### 공부
 
 [WebSocket 정리](./doc/WebSocket.md)
