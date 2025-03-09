@@ -1,4 +1,4 @@
-package com.example.chatserver.common;
+package com.example.chatserver.common.dto;
 
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
