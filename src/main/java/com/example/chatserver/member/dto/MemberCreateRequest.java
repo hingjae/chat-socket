@@ -14,11 +14,11 @@ public class MemberCreateRequest {
     private String email;
     private String password;
 
-    public Member toEntity() {
+    public Member toEntity(String encodedPassword) {
         return Member.builder()
                 .name(name)
                 .email(email)
-                .password(password)
+                .password(encodedPassword)
                 .role(Role.USER)
                 .build();
     }
