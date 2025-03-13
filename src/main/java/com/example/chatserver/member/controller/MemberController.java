@@ -1,17 +1,11 @@
 package com.example.chatserver.member.controller;
 
 import com.example.chatserver.common.dto.ApiResponse;
-import com.example.chatserver.member.dto.MemberCreateRequest;
-import com.example.chatserver.member.dto.MemberCreateResponse;
-import com.example.chatserver.member.dto.MemberLoginRequest;
-import com.example.chatserver.member.dto.MemberLoginResponse;
+import com.example.chatserver.member.dto.*;
 import com.example.chatserver.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -31,6 +25,12 @@ public class MemberController {
     @PostMapping("/login")
     public ApiResponse<?> login(@RequestBody MemberLoginRequest request) {
         MemberLoginResponse response = memberService.login(request);
+        return ApiResponse.ok(response);
+    }
+
+    @GetMapping
+    public ApiResponse<?> memberList() {
+        MemberListResponse response = memberService.findAll();
         return ApiResponse.ok(response);
     }
 

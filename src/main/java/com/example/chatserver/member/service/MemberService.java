@@ -2,17 +2,18 @@ package com.example.chatserver.member.service;
 
 import com.example.chatserver.common.auth.JwtTokenProvider;
 import com.example.chatserver.member.domain.Member;
-import com.example.chatserver.member.dto.MemberCreateRequest;
-import com.example.chatserver.member.dto.MemberCreateResponse;
-import com.example.chatserver.member.dto.MemberLoginRequest;
-import com.example.chatserver.member.dto.MemberLoginResponse;
+import com.example.chatserver.member.dto.*;
 import com.example.chatserver.member.repository.MemberRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class MemberService {
@@ -30,6 +31,7 @@ public class MemberService {
         String encodedPassword = passwordEncoder.encode(request.getPassword());
         Member member = request.toEntity(encodedPassword);
         Member savedMember = memberRepository.save(member);
+        log.info("savedMember: {}", savedMember.getEmail());
         return new MemberCreateResponse(savedMember.getId());
     }
 
@@ -42,5 +44,11 @@ public class MemberService {
 
         String jwtToken = jwtTokenProvider.createToken(member.getEmail(), member.getRole().name());
         return new MemberLoginResponse(member.getId(), jwtToken);
+    }
+
+    public MemberListResponse findAll() {
+        List<Member> members = memberRepository.findAll();
+
+        return new MemberListResponse(members);
     }
 }
