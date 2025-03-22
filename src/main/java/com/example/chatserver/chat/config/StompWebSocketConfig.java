@@ -1,14 +1,20 @@
 package com.example.chatserver.chat.config;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 
+@RequiredArgsConstructor
 @Configuration
 @EnableWebSocketMessageBroker // stomp
 public class StompWebSocketConfig implements WebSocketMessageBrokerConfigurer {
+
+    private final StompHandler stompHandler;
+
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/connect")
@@ -26,5 +32,12 @@ public class StompWebSocketConfig implements WebSocketMessageBrokerConfigurer {
         // 메시지 수신
         // ex. /topic/1 형태로 메시지 수신.
         registry.enableSimpleBroker("/topic");
+    }
+
+    // WebSocket(connect, subscribe, disconnect)등의 요청시에는 http header 를 넣어 토큰을 검증가능.
+    // 하지만 ws 프로토콜은 http 기반이 아님. 즉 헤더검증을 못함.
+    @Override
+    public void configureClientInboundChannel(ChannelRegistration registration) {
+        registration.interceptors(stompHandler);
     }
 }
