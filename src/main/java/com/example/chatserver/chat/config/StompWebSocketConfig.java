@@ -25,11 +25,12 @@ public class StompWebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
         // 메시지 발행 prefix
-        // ex. /publish/1 형태로 메시지 발행
-        // /publish 로 시작하는 Url 패턴으로 메시지가 발행되면 @Controller 객체의 @MessageMapping 메서드로 라우팅.
+        // ex. client 가 /publish/1 경로로 메시지를 발행
+        // @Controller 객체의 @MessageMapping 메서드로 라우팅.
         registry.setApplicationDestinationPrefixes("/publish");
 
         // 메시지 수신
+        // stomp 내부 브로커를 사용해도 되지만 rabbitMQ, kafka, Redis pub/sub 같은 외부 브로커를 사용할 수도 있다.
         // ex. /topic/1 형태로 메시지 수신.
         registry.enableSimpleBroker("/topic");
     }
