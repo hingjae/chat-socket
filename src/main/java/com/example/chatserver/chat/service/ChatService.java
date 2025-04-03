@@ -5,6 +5,7 @@ import com.example.chatserver.chat.domain.ChatParticipant;
 import com.example.chatserver.chat.domain.ChatRoom;
 import com.example.chatserver.chat.domain.ReadStatus;
 import com.example.chatserver.chat.dto.ChatMessageDto;
+import com.example.chatserver.chat.dto.RoomCreateRequest;
 import com.example.chatserver.chat.repository.ChatMessageRepository;
 import com.example.chatserver.chat.repository.ChatParticipantRepository;
 import com.example.chatserver.chat.repository.ChatRoomRepository;
@@ -13,6 +14,7 @@ import com.example.chatserver.member.domain.Member;
 import com.example.chatserver.member.repository.MemberRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -49,5 +51,23 @@ public class ChatService {
             ReadStatus readStatus = ReadStatus.of(chatRoom, member, chatMessage, chatParticipant);
             readStatusRepository.save(readStatus);
         }
+    }
+
+    // 그룹 채팅방 개설
+    // 채팅방을 만든 사람은 자동으로 채팅방에 참여
+    @Transactional
+    public void createGroupRoom(RoomCreateRequest request) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("cannot find member with email: " + email));
+
+        // 채팅방 생성
+        ChatRoom chatRoom = ChatRoom.createGroupChatRoom(request.getRoomName());
+        chatRoomRepository.save(chatRoom);
+
+        // 채탕참여자로 개설자를 추가.
+        ChatParticipant chatParticipant = ChatParticipant.of(chatRoom, member);
+        chatParticipantRepository.save(chatParticipant);
     }
 }

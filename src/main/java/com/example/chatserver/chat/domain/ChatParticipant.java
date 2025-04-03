@@ -29,4 +29,11 @@ public class ChatParticipant extends BaseTimeEntity {
         this.chatRoom = chatRoom;
         this.member = member;
     }
+
+    public static ChatParticipant of(ChatRoom chatRoom, Member member) {
+        return ChatParticipant.builder()
+                .chatRoom(chatRoom)
+                .member(member)
+                .build();
+    }
 }

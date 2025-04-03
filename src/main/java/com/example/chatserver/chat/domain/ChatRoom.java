@@ -31,4 +31,11 @@ public class ChatRoom extends BaseTimeEntity {
         this.name = name;
         this.isGroupChat = isGroupChat != null ? isGroupChat : false;
     }
+
+    public static ChatRoom createGroupChatRoom(String name) {
+        return ChatRoom.builder()
+                .name(name)
+                .isGroupChat(true)
+                .build();
+    }
 }
