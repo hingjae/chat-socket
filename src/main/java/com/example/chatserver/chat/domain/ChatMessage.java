@@ -39,4 +39,12 @@ public class ChatMessage extends BaseTimeEntity {
         this.member = member;
         this.content = content;
     }
+
+    public static ChatMessage of(ChatRoom chatRoom, Member member, String content) {
+        return ChatMessage.builder()
+                .chatRoom(chatRoom)
+                .member(member)
+                .content(content)
+                .build();
+    }
 }

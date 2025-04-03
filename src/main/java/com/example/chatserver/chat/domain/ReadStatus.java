@@ -3,8 +3,11 @@ package com.example.chatserver.chat.domain;
 import com.example.chatserver.common.domain.BaseTimeEntity;
 import com.example.chatserver.member.domain.Member;
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.util.Objects;
 
 @Entity
 @NoArgsConstructor
@@ -27,4 +30,23 @@ public class ReadStatus extends BaseTimeEntity {
     private ChatMessage chatMessage;
 
     private Boolean isRead;
+
+    @Builder
+    public ReadStatus(Long id, ChatRoom chatRoom, Member member, ChatMessage chatMessage, Boolean isRead) {
+        this.id = id;
+        this.chatRoom = chatRoom;
+        this.member = member;
+        this.chatMessage = chatMessage;
+        this.isRead = isRead;
+    }
+
+    public static ReadStatus of(ChatRoom chatRoom, Member member, ChatMessage chatMessage, ChatParticipant chatParticipant) {
+        return ReadStatus.builder()
+                .chatRoom(chatRoom)
+                .member(member)
+                .chatMessage(chatMessage)
+                .isRead(Objects.equals(chatParticipant.getMember(), member))
+                .build();
+    }
+
 }
