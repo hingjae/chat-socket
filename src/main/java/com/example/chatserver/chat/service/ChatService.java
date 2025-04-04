@@ -5,6 +5,7 @@ import com.example.chatserver.chat.domain.ChatParticipant;
 import com.example.chatserver.chat.domain.ChatRoom;
 import com.example.chatserver.chat.domain.ReadStatus;
 import com.example.chatserver.chat.dto.ChatMessageDto;
+import com.example.chatserver.chat.dto.ChatRoomResponseList;
 import com.example.chatserver.chat.dto.RoomCreateRequest;
 import com.example.chatserver.chat.repository.ChatMessageRepository;
 import com.example.chatserver.chat.repository.ChatParticipantRepository;
@@ -19,7 +20,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -69,5 +69,30 @@ public class ChatService {
         // 채탕참여자로 개설자를 추가.
         ChatParticipant chatParticipant = ChatParticipant.of(chatRoom, member);
         chatParticipantRepository.save(chatParticipant);
+    }
+
+    public ChatRoomResponseList getGroupChatRooms() {
+        List<ChatRoom> chatRooms = chatRoomRepository.findByIsGroupChatTrue();
+        return new ChatRoomResponseList(chatRooms);
+    }
+
+    @Transactional
+    public void addParticipantToGroupChat(Long roomId) {
+        // 채팅방 조회
+        ChatRoom chatRoom = chatRoomRepository.findById(roomId)
+                .orElseThrow(() -> new EntityNotFoundException("cannot find chat room with id: " + roomId));
+
+        // member 조회
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("cannot find member with email: " + email));
+
+        // 이미 참여자인지 검증
+        boolean exists = chatParticipantRepository.existsByChatRoomAndMember(chatRoom, member);
+
+        if (!exists) {
+            ChatParticipant chatParticipant = ChatParticipant.of(chatRoom, member);
+            chatParticipantRepository.save(chatParticipant);
+        }
     }
 }
