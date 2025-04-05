@@ -2,6 +2,7 @@ package com.example.chatserver.chat.config;
 
 import com.example.chatserver.chat.domain.ChatRoom;
 import com.example.chatserver.chat.repository.ChatRoomRepository;
+import com.example.chatserver.chat.service.ChatService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import jakarta.persistence.EntityNotFoundException;
@@ -23,7 +24,7 @@ public class StompHandler implements ChannelInterceptor {
     @Value("${jwt.secretKey}")
     private String secretKey;
 
-    private final ChatRoomRepository chatRoomRepository;
+    private final ChatService chatService;
 
     // subscribe, connect, disconnect, publish 요청이 들어오면 실행
     @Override
@@ -73,8 +74,7 @@ public class StompHandler implements ChannelInterceptor {
             String roomId = accessor.getDestination().split("/")[2];
             // 현재 로그인 유저가 roomId에 존재하는지 여부.
 
-            ChatRoom chatRoom = chatRoomRepository.findByIdWithChatParticipantsAndMember(Long.valueOf(roomId))
-                    .orElseThrow(() -> new EntityNotFoundException("cannot find chat room with id: " + roomId));
+            ChatRoom chatRoom = chatService.getChatRoomFetchJoin(Long.valueOf(roomId));
 
             boolean exists = chatRoom.hasParticipantsEmail(email);
 

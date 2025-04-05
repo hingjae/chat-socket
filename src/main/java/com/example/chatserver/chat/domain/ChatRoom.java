@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @NoArgsConstructor
@@ -48,5 +49,13 @@ public class ChatRoom extends BaseTimeEntity {
     public boolean hasParticipantsEmail(String email) {
         return chatParticipants.stream()
                 .anyMatch(chatParticipant -> chatParticipant.getMember().getEmail().equals(email));
+    }
+
+    public Member getMemberByEmail(String email) {
+        return chatParticipants.stream()
+                .map(ChatParticipant::getMember)
+                .filter(member -> Objects.equals(member.getEmail(), email))
+                .findAny()
+                .orElse(null);
     }
 }

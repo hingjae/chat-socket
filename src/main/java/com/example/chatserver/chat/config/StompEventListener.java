@@ -16,7 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 public class StompEventListener {
 
-    private final Set<String> sessions = ConcurrentHashMap.newKeySet();
+    private final Set<String> sessions = ConcurrentHashMap.newKeySet(); // 디버깅용.
 
     // 웹소켓 세션이 연결될 때 실행되는 메서드를 정의
     @EventListener

@@ -34,12 +34,16 @@ public class ChatService {
     @Transactional
     public void saveMessage(Long roomId, ChatMessageDto chatMessageDto) {
         // 채팅방 조회
-        ChatRoom chatRoom = chatRoomRepository.findById(roomId)
+        ChatRoom chatRoom = chatRoomRepository.findByIdWithChatParticipantsAndMember(roomId)
                 .orElseThrow(() -> new EntityNotFoundException("cannot find chat room with id: " + roomId));
 
         // 보낸사람 조회
-        Member member = memberRepository.findByEmail(chatMessageDto.getSender())
-                .orElseThrow(() -> new EntityNotFoundException("cannot find member with email: " + chatMessageDto.getSender()));
+        boolean exists = chatRoom.hasParticipantsEmail(chatMessageDto.getSender());
+        if (!exists) {
+            throw new IllegalArgumentException("본인이 속하지 않은 채팅방입니다.");
+        }
+
+        Member member = chatRoom.getMemberByEmail(chatMessageDto.getSender());
 
         // 메세지 저장.
         ChatMessage chatMessage = ChatMessage.of(chatRoom, member, chatMessageDto.getContent());
@@ -47,11 +51,13 @@ public class ChatService {
 
         // 채팅방 참여자 별로 ReadStatus 저장.
         // 채팅마다 읽음 여부를 생성하는군.
-        List<ChatParticipant> chatParticipants = chatParticipantRepository.findByChatRoom(chatRoom);
-        for (ChatParticipant chatParticipant : chatParticipants) {
-            ReadStatus readStatus = ReadStatus.of(chatRoom, member, chatMessage, chatParticipant);
-            readStatusRepository.save(readStatus);
-        }
+        List<ChatParticipant> chatParticipants = chatRoom.getChatParticipants();
+
+        List<ReadStatus> readStatuses = chatParticipants.stream()
+                .map(chatParticipant -> ReadStatus.of(chatRoom, member, chatMessage, chatParticipant))
+                .toList();
+
+        readStatusRepository.saveAll(readStatuses);
     }
 
     // 그룹 채팅방 개설
@@ -117,5 +123,10 @@ public class ChatService {
         List<ChatMessage> chatMessages = chatMessageRepository.findByChatRoomWithMemberOrderByCreatedTimeAsc(chatRoom);
 
         return ChatMessageDtoList.from(chatMessages);
+    }
+
+    public ChatRoom getChatRoomFetchJoin(Long roomId) {
+        return chatRoomRepository.findByIdWithChatParticipantsAndMember(roomId)
+                .orElseThrow(() -> new EntityNotFoundException("cannot find chat room with id: " + roomId));
     }
 }
