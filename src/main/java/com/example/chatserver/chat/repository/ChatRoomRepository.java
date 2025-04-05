@@ -2,6 +2,7 @@ package com.example.chatserver.chat.repository;
 
 import com.example.chatserver.chat.domain.ChatRoom;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
@@ -16,4 +17,9 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
             " join fetch chatParticipants.member" +
             " where chatRoom.id = :id")
     Optional<ChatRoom> findByIdWithChatParticipantsAndMember(Long id);
+
+
+    @Modifying(flushAutomatically = true)
+    @Query("delete from ChatRoom chatRoom where chatRoom.id = :id")
+    void deleteByIdJpql(Long id);
 }
