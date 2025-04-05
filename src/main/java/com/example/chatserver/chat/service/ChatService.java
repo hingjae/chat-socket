@@ -148,6 +148,7 @@ public class ChatService {
         return new MyChatRoomResponseList(myChatRoomResponses);
     }
 
+    @Transactional
     public void leaveGroupChatRoom(Long roomId) {
         ChatRoom chatRoom = getChatRoomFetchJoin(roomId);
         Member member = chatRoom.getMemberByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
@@ -156,14 +157,15 @@ public class ChatService {
             throw new IllegalArgumentException("단체 채팅방이 아닙니다.");
         }
 
-        ChatParticipant chatParticipant = chatParticipantRepository.findByChatRoomAndMember(chatRoom, member)
-                .orElseThrow(() -> new EntityNotFoundException("cannot find chat participant with id: " + roomId));
+        ChatParticipant chatParticipant = chatRoom.removeParticipantByMember(member);
         chatParticipantRepository.delete(chatParticipant);
 
         // 채팅방에 사람이 아무도 없으면 삭제
-        List<ChatParticipant> chatParticipants = chatParticipantRepository.findByChatRoom(chatRoom);
+        List<ChatParticipant> chatParticipants = chatRoom.getChatParticipants();
         if (chatParticipants.isEmpty()) {
-            chatRoomRepository.delete(chatRoom);
+            readStatusRepository.deleteAllByChatRoom(chatRoom);
+            chatMessageRepository.deleteAllByChatRoom(chatRoom);
+            chatRoomRepository.deleteByIdJpql(chatRoom.getId());
         }
     }
 

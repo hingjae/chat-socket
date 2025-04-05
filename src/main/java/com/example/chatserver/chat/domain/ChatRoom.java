@@ -58,4 +58,22 @@ public class ChatRoom extends BaseTimeEntity {
                 .findAny()
                 .orElse(null);
     }
+
+    public ChatParticipant getChatParticipantByMember(Member member) {
+        return chatParticipants.stream()
+                .filter(chatParticipant -> chatParticipant.getMember().equals(member))
+                .findAny()
+                .orElse(null);
+    }
+
+    public ChatParticipant removeParticipantByMember(Member member) {
+        ChatParticipant chatParticipant = chatParticipants.stream()
+                .filter(item -> item.getMember().equals(member))
+                .findAny()
+                .orElse(null);
+
+        chatParticipants.remove(chatParticipant);
+
+        return chatParticipant;
+    }
 }
