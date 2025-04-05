@@ -49,4 +49,7 @@ public class ReadStatus extends BaseTimeEntity {
                 .build();
     }
 
+    public void updateIsRead(Boolean isRead) {
+        this.isRead = isRead;
+    }
 }
