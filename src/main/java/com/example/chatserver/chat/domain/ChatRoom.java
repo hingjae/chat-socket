@@ -1,6 +1,7 @@
 package com.example.chatserver.chat.domain;
 
 import com.example.chatserver.common.domain.BaseTimeEntity;
+import com.example.chatserver.member.domain.Member;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
@@ -37,5 +38,15 @@ public class ChatRoom extends BaseTimeEntity {
                 .name(name)
                 .isGroupChat(true)
                 .build();
+    }
+
+    public boolean isChatRoomMember(Member member) {
+        return chatParticipants.stream()
+                .anyMatch(chatParticipant -> chatParticipant.getMember().equals(member));
+    }
+
+    public boolean hasParticipantsEmail(String email) {
+        return chatParticipants.stream()
+                .anyMatch(chatParticipant -> chatParticipant.getMember().getEmail().equals(email));
     }
 }

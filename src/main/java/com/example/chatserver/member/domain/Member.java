@@ -2,13 +2,11 @@ package com.example.chatserver.member.domain;
 
 import com.example.chatserver.common.domain.BaseTimeEntity;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@EqualsAndHashCode(of = {"id"}, callSuper = false)
 @Getter
 public class Member extends BaseTimeEntity {
     @Id

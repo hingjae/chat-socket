@@ -1,5 +1,6 @@
 package com.example.chatserver.chat.controller;
 
+import com.example.chatserver.chat.dto.ChatMessageDtoList;
 import com.example.chatserver.chat.dto.ChatRoomResponseList;
 import com.example.chatserver.chat.dto.RoomCreateRequest;
 import com.example.chatserver.chat.service.ChatService;
@@ -34,5 +35,11 @@ public class ChatController {
         chatService.addParticipantToGroupChat(roomId);
 
         return ApiResponse.ok("join group room success");
+    }
+
+    @GetMapping("/history/{roomId}")
+    public ApiResponse<?> getChatHistory(@PathVariable Long roomId) {
+        ChatMessageDtoList chatHistories = chatService.getChatHistories(roomId);
+        return ApiResponse.ok(chatHistories);
     }
 }
