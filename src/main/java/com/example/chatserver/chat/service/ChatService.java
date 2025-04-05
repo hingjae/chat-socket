@@ -39,10 +39,10 @@ public class ChatService {
             throw new IllegalArgumentException("본인이 속하지 않은 채팅방입니다.");
         }
 
-        Member member = chatRoom.getMemberByEmail(chatMessageDto.getSender());
+        Member memberSender = chatRoom.getMemberByEmail(chatMessageDto.getSender());
 
         // 메세지 저장.
-        ChatMessage chatMessage = ChatMessage.of(chatRoom, member, chatMessageDto.getContent());
+        ChatMessage chatMessage = ChatMessage.of(chatRoom, memberSender, chatMessageDto.getContent());
         chatMessageRepository.save(chatMessage);
 
         // 채팅방 참여자 별로 ReadStatus 저장.
@@ -50,7 +50,7 @@ public class ChatService {
         List<ChatParticipant> chatParticipants = chatRoom.getChatParticipants();
 
         List<ReadStatus> readStatuses = chatParticipants.stream()
-                .map(chatParticipant -> ReadStatus.of(chatRoom, member, chatMessage, chatParticipant))
+                .map(chatParticipant -> ReadStatus.of(chatRoom, chatMessage, chatParticipant, memberSender))
                 .toList();
 
         readStatusRepository.saveAll(readStatuses);

@@ -40,12 +40,13 @@ public class ReadStatus extends BaseTimeEntity {
         this.isRead = isRead;
     }
 
-    public static ReadStatus of(ChatRoom chatRoom, Member member, ChatMessage chatMessage, ChatParticipant chatParticipant) {
+    public static ReadStatus of(ChatRoom chatRoom, ChatMessage chatMessage, ChatParticipant chatParticipant, Member memberSender) {
+        Member participantMember = chatParticipant.getMember();
         return ReadStatus.builder()
                 .chatRoom(chatRoom)
-                .member(member)
+                .member(participantMember)
                 .chatMessage(chatMessage)
-                .isRead(Objects.equals(chatParticipant.getMember(), member))
+                .isRead(Objects.equals(participantMember, memberSender))
                 .build();
     }
 
