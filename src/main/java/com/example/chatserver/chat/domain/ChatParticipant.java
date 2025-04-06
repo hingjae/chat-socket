@@ -7,6 +7,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Entity
 @NoArgsConstructor
 @Getter
@@ -35,5 +37,11 @@ public class ChatParticipant extends BaseTimeEntity {
                 .chatRoom(chatRoom)
                 .member(member)
                 .build();
+    }
+
+    public static List<ChatParticipant> of(ChatRoom chatRoom, List<Member> members) {
+        return members.stream()
+                .map(member -> of(chatRoom, member))
+                .toList();
     }
 }

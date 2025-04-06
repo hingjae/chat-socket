@@ -41,9 +41,11 @@ public class ChatRoom extends BaseTimeEntity {
                 .build();
     }
 
-    public boolean isChatRoomMember(Member member) {
-        return chatParticipants.stream()
-                .anyMatch(chatParticipant -> chatParticipant.getMember().equals(member));
+    public static ChatRoom createPrivateChatRoom(String memberName, String targetMemberName) {
+        return ChatRoom.builder()
+                .name(memberName + "-" + targetMemberName)
+                .isGroupChat(false)
+                .build();
     }
 
     public boolean hasParticipantsEmail(String email) {
@@ -55,13 +57,6 @@ public class ChatRoom extends BaseTimeEntity {
         return chatParticipants.stream()
                 .map(ChatParticipant::getMember)
                 .filter(member -> Objects.equals(member.getEmail(), email))
-                .findAny()
-                .orElse(null);
-    }
-
-    public ChatParticipant getChatParticipantByMember(Member member) {
-        return chatParticipants.stream()
-                .filter(chatParticipant -> chatParticipant.getMember().equals(member))
                 .findAny()
                 .orElse(null);
     }

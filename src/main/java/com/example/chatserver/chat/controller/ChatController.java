@@ -1,9 +1,6 @@
 package com.example.chatserver.chat.controller;
 
-import com.example.chatserver.chat.dto.ChatMessageDtoList;
-import com.example.chatserver.chat.dto.ChatRoomResponseList;
-import com.example.chatserver.chat.dto.MyChatRoomResponseList;
-import com.example.chatserver.chat.dto.RoomCreateRequest;
+import com.example.chatserver.chat.dto.*;
 import com.example.chatserver.chat.service.ChatService;
 import com.example.chatserver.common.dto.ApiResponse;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +14,7 @@ public class ChatController {
 
     // 그룹 채팅방 개설
     @PostMapping(("/room/group/create"))
-    public ApiResponse<?> createGroupRoom(@RequestBody RoomCreateRequest request) {
+    public ApiResponse<?> createGroupRoom(@RequestBody GroupChatRoomCreateRequest request) {
         chatService.createGroupRoom(request);
         return ApiResponse.ok("create group room success");
     }
@@ -64,5 +61,12 @@ public class ChatController {
     public ApiResponse<?> leaveGroupChatRoom(@PathVariable Long roomId) {
         chatService.leaveGroupChatRoom(roomId);
         return ApiResponse.ok("leave group room success");
+    }
+
+    // 개인 채팅방 개설 또는 기존 roomId return
+    @PostMapping("/room/private/create")
+    public ApiResponse<?> getOrCreatePrivateChatRoom(@RequestBody PrivateChatRoomCreateRequest request) {
+        Long roomId = chatService.getOrCreatePrivateRoom(request.getMemberId());
+        return ApiResponse.ok(roomId);
     }
 }

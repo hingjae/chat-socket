@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -28,6 +29,7 @@ public class ChatService {
     private final ReadStatusRepository readStatusRepository;
     private final MemberRepository memberRepository;
 
+    // 메시지 저장
     @Transactional
     public void saveMessage(Long roomId, ChatMessageDto chatMessageDto) {
         // 채팅방 조회
@@ -59,7 +61,7 @@ public class ChatService {
     // 그룹 채팅방 개설
     // 채팅방을 만든 사람은 자동으로 채팅방에 참여
     @Transactional
-    public void createGroupRoom(RoomCreateRequest request) {
+    public void createGroupRoom(GroupChatRoomCreateRequest request) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
 
         Member member = memberRepository.findByEmail(email)
@@ -74,15 +76,21 @@ public class ChatService {
         chatParticipantRepository.save(chatParticipant);
     }
 
+    // 그룹 채팅방 조회
     public ChatRoomResponseList getGroupChatRooms() {
         List<ChatRoom> chatRooms = chatRoomRepository.findByIsGroupChatTrue();
         return new ChatRoomResponseList(chatRooms);
     }
 
+
     @Transactional
     public void addParticipantToGroupChat(Long roomId) {
         // 채팅방 조회
         ChatRoom chatRoom = getChatRoomFetchJoin(roomId);
+
+        if (!chatRoom.getIsGroupChat()) {
+            throw new IllegalArgumentException("그룹채팅방이 아닙니다.");
+        }
 
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
 
@@ -172,5 +180,29 @@ public class ChatService {
     public ChatRoom getChatRoomFetchJoin(Long roomId) {
         return chatRoomRepository.findByIdWithChatParticipantsAndMember(roomId)
                 .orElseThrow(() -> new EntityNotFoundException("cannot find chat room with id: " + roomId));
+    }
+
+    @Transactional
+    public Long getOrCreatePrivateRoom(Long memberId) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("cannot find member with email: " + email));
+        Member targetMember = memberRepository.findById(memberId)
+                .orElseThrow(() -> new EntityNotFoundException("cannot find member with id: " + memberId));
+
+        // 나와 상대방이 개인 채팅이 이미 있다면 해당 roomId를 반환
+        Optional<Long> chatRoomIdOptional = chatRoomRepository.findPrivateRoom(member.getId(), targetMember.getId());
+
+        if (chatRoomIdOptional.isPresent()) {
+            return chatRoomIdOptional.get();
+        }
+
+        // 없으면 새로운 채팅방 개설후 roomId 반환
+        ChatRoom privateChatRoom = ChatRoom.createPrivateChatRoom(member.getName(), targetMember.getName());
+
+        Long savedRoomId = chatRoomRepository.save(privateChatRoom).getId();
+        List<ChatParticipant> chatParticipants = ChatParticipant.of(privateChatRoom, List.of(member, targetMember));
+        chatParticipantRepository.saveAll(chatParticipants);
+        return savedRoomId;
     }
 }
